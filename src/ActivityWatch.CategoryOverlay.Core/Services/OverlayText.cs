@@ -1,3 +1,5 @@
+using ActivityWatch.CategoryOverlay.Core.Models;
+
 namespace ActivityWatch.CategoryOverlay.Core.Services;
 
 public static class OverlayText
@@ -11,5 +13,15 @@ public static class OverlayText
         }
 
         return $"{totalMinutes / 60}h {totalMinutes % 60:00}m";
+    }
+
+    public static string FormatDirection(ThresholdDirection direction)
+    {
+        return direction switch
+        {
+            ThresholdDirection.Minimum => "MIN ·",
+            ThresholdDirection.Maximum => "MAX ·",
+            _ => throw new ArgumentOutOfRangeException(nameof(direction)),
+        };
     }
 }

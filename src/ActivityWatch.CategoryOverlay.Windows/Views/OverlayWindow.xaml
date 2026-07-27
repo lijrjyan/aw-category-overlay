@@ -58,11 +58,21 @@
     </Border.Effect>
     <StackPanel>
       <Grid Margin="1,0,1,13" Opacity="{Binding HeaderOpacity}">
-        <TextBlock Text="{Binding HeaderText}"
-                   Foreground="White"
-                   FontFamily="Segoe UI"
-                   FontSize="12"
-                   FontWeight="SemiBold" />
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Text="TODAY"
+                     Foreground="White"
+                     FontFamily="Segoe UI"
+                     FontSize="15"
+                     FontWeight="SemiBold"
+                     VerticalAlignment="Center" />
+          <TextBlock Text="{Binding TotalText}"
+                     Margin="10,0,0,0"
+                     Foreground="White"
+                     FontFamily="Segoe UI"
+                     FontSize="18"
+                     FontWeight="Bold"
+                     VerticalAlignment="Center" />
+        </StackPanel>
         <TextBlock Text="{Binding LastRefreshText}"
                    HorizontalAlignment="Right"
                    Foreground="White"
@@ -81,8 +91,8 @@
                            Style="{StaticResource OverlayProgress}" />
               <Grid>
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="65*" />
-                  <ColumnDefinition Width="35*" />
+                  <ColumnDefinition Width="60*" />
+                  <ColumnDefinition Width="40*" />
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0" Margin="9,0,9,0">
                   <TextBlock Text="{Binding DisplayName}"
@@ -103,14 +113,23 @@
                         HorizontalAlignment="Right"
                         Width="1"
                         Background="#C8FFFFFF" />
-                <TextBlock Grid.Column="1"
-                           Text="{Binding ActualText}"
-                           Style="{StaticResource CategoryBarText}"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           Margin="9,0"
-                           Foreground="#F2FFFFFF"
-                           FontWeight="Bold" />
+                <Grid Grid.Column="1">
+                  <TextBlock Text="{Binding RequirementText}"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             Margin="9,0,0,0"
+                             Foreground="#A8FFFFFF"
+                             FontFamily="Segoe UI"
+                             FontSize="10"
+                             FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding ActualText}"
+                             Style="{StaticResource CategoryBarText}"
+                             HorizontalAlignment="Right"
+                             VerticalAlignment="Center"
+                             Margin="42,0,9,0"
+                             Foreground="#F2FFFFFF"
+                             FontWeight="Bold" />
+                </Grid>
               </Grid>
             </Grid>
           </DataTemplate>

@@ -1,3 +1,4 @@
+using ActivityWatch.CategoryOverlay.Core.Models;
 using ActivityWatch.CategoryOverlay.Core.Services;
 
 namespace ActivityWatch.CategoryOverlay.Core.Tests;
@@ -15,5 +16,15 @@ public sealed class OverlayTextTests
         Assert.Equal(
             expected,
             OverlayText.FormatDuration(TimeSpan.FromMinutes(minutes)));
+    }
+
+    [Theory]
+    [InlineData(ThresholdDirection.Minimum, "MIN ·")]
+    [InlineData(ThresholdDirection.Maximum, "MAX ·")]
+    public void FormatDirection_uses_compact_requirement_labels(
+        ThresholdDirection direction,
+        string expected)
+    {
+        Assert.Equal(expected, OverlayText.FormatDirection(direction));
     }
 }

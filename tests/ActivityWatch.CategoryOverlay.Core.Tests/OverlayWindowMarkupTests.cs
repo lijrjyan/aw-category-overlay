@@ -6,19 +6,47 @@ namespace ActivityWatch.CategoryOverlay.Core.Tests;
 public sealed class OverlayWindowMarkupTests
 {
     [Fact]
-    public void Header_shows_total_time_instead_of_top_categories_label()
+    public void Header_emphasizes_today_and_total_time_separately()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
         XNamespace presentation =
             "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
-        var header = document
+        var today = document
             .Descendants(presentation + "TextBlock")
-            .Single(element => (string?)element.Attribute("Text") == "{Binding HeaderText}");
+            .Single(element => (string?)element.Attribute("Text") == "TODAY");
+        var total = document
+            .Descendants(presentation + "TextBlock")
+            .Single(element => (string?)element.Attribute("Text") == "{Binding TotalText}");
 
-        Assert.NotNull(header);
-        Assert.DoesNotContain(
-            document.Descendants(presentation + "TextBlock"),
-            element => (string?)element.Attribute("Text") == "TODAY · TOP CATEGORIES");
+        Assert.Equal("15", today.Attribute("FontSize")?.Value);
+        Assert.Equal("18", total.Attribute("FontSize")?.Value);
+    }
+
+    [Fact]
+    public void Requirement_label_appears_after_the_divider()
+    {
+        var document = XDocument.Load(GetOverlayXamlPath());
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var requirement = document
+            .Descendants(presentation + "TextBlock")
+            .Single(element =>
+                (string?)element.Attribute("Text") == "{Binding RequirementText}");
+        var rightColumn = requirement
+            .Ancestors(presentation + "Grid")
+            .First(element => element.Attribute("Grid.Column") is not null);
+
+        Assert.Equal("1", rightColumn.Attribute("Grid.Column")?.Value);
+    }
+
+    [Fact]
+    public void View_model_exposes_total_and_requirement_text()
+    {
+        var source = File.ReadAllText(GetOverlayViewModelPath());
+
+        Assert.Contains("TotalText", source);
+        Assert.Contains("RequirementText", source);
+        Assert.DoesNotContain("HeaderText", source);
     }
 
     [Fact]
@@ -61,5 +89,14 @@ public sealed class OverlayWindowMarkupTests
             Path.Combine(
                 Path.GetDirectoryName(testFilePath)!,
                 "../../src/ActivityWatch.CategoryOverlay.Windows/Views/OverlayWindow.xaml"));
+    }
+
+    private static string GetOverlayViewModelPath(
+        [CallerFilePath] string testFilePath = "")
+    {
+        return Path.GetFullPath(
+            Path.Combine(
+                Path.GetDirectoryName(testFilePath)!,
+                "../../src/ActivityWatch.CategoryOverlay.Windows/ViewModels/OverlayViewModel.cs"));
     }
 }

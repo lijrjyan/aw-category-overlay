@@ -9,7 +9,7 @@ namespace ActivityWatch.CategoryOverlay.Windows.ViewModels;
 
 public sealed class OverlayViewModel : INotifyPropertyChanged
 {
-    private string _headerText = "TODAY · 0m";
+    private string _totalText = "TOTAL 0m";
     private string _lastRefreshText = "--:--";
     private double _headerOpacity = 0.62;
     private double _overlayOpacity = 0.72;
@@ -17,10 +17,10 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
 
     public ObservableCollection<OverlayRowViewModel> Rows { get; } = [];
 
-    public string HeaderText
+    public string TotalText
     {
-        get => _headerText;
-        private set => SetField(ref _headerText, value);
+        get => _totalText;
+        private set => SetField(ref _totalText, value);
     }
 
     public string LastRefreshText
@@ -57,7 +57,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
             Rows.Add(OverlayRowViewModel.From(row));
         }
 
-        HeaderText = $"TODAY · {OverlayText.FormatDuration(state.TotalActiveTime)}";
+        TotalText = $"TOTAL {OverlayText.FormatDuration(state.TotalActiveTime)}";
         LastRefreshText = state.LastSuccessfulRefresh?.ToLocalTime().ToString("HH:mm")
             ?? "--:--";
         HeaderOpacity = state.IsStale ? 0.35 : 0.62;
@@ -80,6 +80,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
 public sealed record OverlayRowViewModel(
     string DisplayName,
     string ThresholdText,
+    string RequirementText,
     string ActualText,
     double FillFraction,
     System.Windows.Media.Brush FillBrush)
@@ -99,6 +100,7 @@ public sealed record OverlayRowViewModel(
         return new OverlayRowViewModel(
             row.Target.DisplayName,
             OverlayText.FormatDuration(row.Target.Threshold),
+            OverlayText.FormatDirection(row.Target.Direction),
             OverlayText.FormatDuration(row.Actual),
             row.FillFraction,
             brush);

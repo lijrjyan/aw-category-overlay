@@ -49,6 +49,7 @@
                   <ColumnDefinition Width="46" />
                   <ColumnDefinition Width="16" />
                   <ColumnDefinition Width="46" />
+                  <ColumnDefinition Width="16" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding DisplayName}"
                            VerticalAlignment="Center"
@@ -68,6 +69,10 @@
                 <TextBox Grid.Column="4"
                          Text="{Binding MinutesText, UpdateSourceTrigger=PropertyChanged}"
                          VerticalContentAlignment="Center" />
+                <TextBlock Grid.Column="5"
+                           Text="m"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>

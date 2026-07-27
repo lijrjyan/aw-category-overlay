@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace ActivityWatch.CategoryOverlay.Core.Tests;
 
@@ -24,6 +25,20 @@ public sealed class SettingsWindowSourceTests
         Assert.Contains("Bar font size", markup);
         Assert.Contains("BarFontSize", markup);
         Assert.Contains("StringFormat={}{0:F2}", markup);
+    }
+
+    [Fact]
+    public void Threshold_editor_shows_minutes_unit_after_minutes_value()
+    {
+        var document = XDocument.Load(GetSourcePath(
+            "Views/SettingsWindow.xaml"));
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var minutesUnit = document
+            .Descendants(presentation + "TextBlock")
+            .Single(element => (string?)element.Attribute("Text") == "m");
+
+        Assert.Equal("5", minutesUnit.Attribute("Grid.Column")?.Value);
     }
 
     [Fact]
