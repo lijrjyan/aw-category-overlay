@@ -118,4 +118,28 @@ unknown_setting = true
                 -SkipRegistryMigration
         } | Should Throw
     }
+
+    It "does not partially install when the overlay config is invalid" {
+        $originalAwQtConfig = Get-Content $awQtConfigPath -Raw
+        [IO.File]::WriteAllText(
+            $overlayConfigPath,
+            "{not-json",
+            [Text.UTF8Encoding]::new($false))
+
+        {
+            & $installScript `
+                -SourceExecutable $sourceExecutable `
+                -ActivityWatchDirectory $activityWatchDirectory `
+                -AwQtConfigPath $awQtConfigPath `
+                -OverlayConfigPath $overlayConfigPath `
+                -SkipRegistryMigration
+        } | Should Throw
+
+        (Get-Content $awQtConfigPath -Raw) |
+            Should Be $originalAwQtConfig
+        (Test-Path (
+            Join-Path $activityWatchDirectory "aw-category-overlay.exe")) |
+            Should Be $false
+        @(Get-ChildItem "$awQtConfigPath.backup-*").Count | Should Be 0
+    }
 }

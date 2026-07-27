@@ -97,6 +97,21 @@ $updatedConfig = Get-UpdatedModuleConfig `
     -Module $ModuleName `
     -Install $true
 
+$updatedOverlayConfig = $null
+if (Test-Path $OverlayConfigPath -PathType Leaf) {
+    $overlayConfig = [IO.File]::ReadAllText($OverlayConfigPath) |
+        ConvertFrom-Json
+    if ($null -eq $overlayConfig.startWithWindows) {
+        $overlayConfig |
+            Add-Member -NotePropertyName startWithWindows `
+                -NotePropertyValue $false
+    }
+    else {
+        $overlayConfig.startWithWindows = $false
+    }
+    $updatedOverlayConfig = $overlayConfig | ConvertTo-Json -Depth 10
+}
+
 if ($PSCmdlet.ShouldProcess(
         $ActivityWatchDirectory,
         "Install ActivityWatch category overlay module")) {
@@ -109,22 +124,11 @@ if ($PSCmdlet.ShouldProcess(
         $updatedConfig,
         [Text.UTF8Encoding]::new($false))
 
-    if (Test-Path $OverlayConfigPath -PathType Leaf) {
+    if ($null -ne $updatedOverlayConfig) {
         Copy-Item $OverlayConfigPath "$OverlayConfigPath.backup-$backupStamp"
-        $overlayConfig = [IO.File]::ReadAllText($OverlayConfigPath) |
-            ConvertFrom-Json
-        if ($null -eq $overlayConfig.startWithWindows) {
-            $overlayConfig |
-                Add-Member -NotePropertyName startWithWindows `
-                    -NotePropertyValue $false
-        }
-        else {
-            $overlayConfig.startWithWindows = $false
-        }
-        $serialized = $overlayConfig | ConvertTo-Json -Depth 10
         [IO.File]::WriteAllText(
             $OverlayConfigPath,
-            $serialized,
+            $updatedOverlayConfig,
             [Text.UTF8Encoding]::new($false))
     }
 
