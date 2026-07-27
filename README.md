@@ -17,15 +17,15 @@ The current machine already has the required runtime.
 From WSL:
 
 ```bash
-dotnet build aw-category-overlay/ActivityWatch.CategoryOverlay.sln
-dotnet test aw-category-overlay/ActivityWatch.CategoryOverlay.sln
+dotnet build ActivityWatch.CategoryOverlay.sln
+dotnet test ActivityWatch.CategoryOverlay.sln
 ```
 
 Run the opt-in read-only test against the live ActivityWatch server:
 
 ```bash
 AW_OVERLAY_RUN_LIVE_TESTS=1 \
-dotnet test aw-category-overlay/tests/ActivityWatch.CategoryOverlay.Core.Tests \
+dotnet test tests/ActivityWatch.CategoryOverlay.Core.Tests \
   --filter FullyQualifiedName~ActivityWatchLiveParityTests
 ```
 
@@ -33,17 +33,17 @@ dotnet test aw-category-overlay/tests/ActivityWatch.CategoryOverlay.Core.Tests \
 
 ```bash
 dotnet publish \
-  aw-category-overlay/src/ActivityWatch.CategoryOverlay.Windows/ActivityWatch.CategoryOverlay.Windows.csproj \
+  src/ActivityWatch.CategoryOverlay.Windows/ActivityWatch.CategoryOverlay.Windows.csproj \
   -c Release \
   -r win-x64 \
   --self-contained false \
-  -o aw-category-overlay/artifacts/win-x64
+  -o artifacts/win-x64
 ```
 
 Launch:
 
 ```text
-aw-category-overlay/artifacts/win-x64/ActivityWatch.CategoryOverlay.exe
+artifacts/win-x64/ActivityWatch.CategoryOverlay.exe
 ```
 
 For a stable Windows-local path, copy the executable to:
@@ -80,6 +80,33 @@ Configuration is stored at:
 
 The logical day boundary is read from ActivityWatch `startOfDay`; the user's
 current server uses 04:00. The default refresh interval is five minutes.
+
+## Startup modes
+
+Integrated mode is recommended. In this mode, `aw-qt` owns the overlay process
+through its existing `autostart_modules` setting, so the overlay starts and
+stops with ActivityWatch. From Windows PowerShell:
+
+```powershell
+.\scripts\Install-ActivityWatchModule.ps1 `
+    -SourceExecutable .\artifacts\win-x64\ActivityWatch.CategoryOverlay.exe
+```
+
+The installer discovers the running `aw-qt` location, backs up `aw-qt.toml`,
+copies the executable beside `aw-qt.exe`, adds `aw-category-overlay` only to the
+production module list, and disables the overlay's separate Windows Run entry.
+It does not modify ActivityWatch events, server settings, watchers, or category
+rules.
+
+To remove only the launcher integration:
+
+```powershell
+.\scripts\Uninstall-ActivityWatchModule.ps1
+```
+
+Standalone mode remains available by launching the executable directly and
+optionally enabling its own Windows autostart from the tray. Do not enable both
+startup mechanisms.
 
 ## Data safety
 
