@@ -14,6 +14,8 @@ public partial class App : System.Windows.Application
     private readonly CancellationTokenSource _shutdown = new();
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
     private readonly AutostartService _autostartService = new();
+    private readonly IClock _clock = new SystemClock();
+    private readonly IAsyncDelay _delay = new SystemAsyncDelay();
     private Mutex? _singleInstanceMutex;
     private bool _ownsSingleInstanceMutex;
     private HttpClient? _httpClient;
@@ -21,6 +23,7 @@ public partial class App : System.Windows.Application
     private OverlayConfiguration _configuration = OverlayConfiguration.Default;
     private OverlayState _currentState = OverlayState.Empty;
     private OverlayStateService? _stateService;
+    private RefreshScheduler? _refreshScheduler;
     private OverlayViewModel? _overlayViewModel;
     private OverlayWindow? _overlayWindow;
     private SettingsWindow? _settingsWindow;
@@ -58,8 +61,9 @@ public partial class App : System.Windows.Application
         };
         _stateService = new OverlayStateService(
             new ActivityWatchClient(_httpClient),
-            new SystemClock(),
+            _clock,
             _configuration);
+        _refreshScheduler = new RefreshScheduler(_clock, _delay);
         _overlayViewModel = new OverlayViewModel();
         _overlayWindow = new OverlayWindow(
             _overlayViewModel,
@@ -67,7 +71,7 @@ public partial class App : System.Windows.Application
             SavePositionAsync);
         _trayService = new TrayService(
             ToggleVisibilityAsync,
-            () => RefreshOnceAsync(_shutdown.Token),
+            () => RefreshWithRetryAsync(_shutdown.Token),
             ToggleEditMode,
             OpenSettings,
             ToggleAutostartAsync,
@@ -80,7 +84,7 @@ public partial class App : System.Windows.Application
 
         ApplyAutostart(_configuration.StartWithWindows);
         UpdateTray();
-        await RefreshOnceAsync(_shutdown.Token);
+        await RefreshWithRetryAsync(_shutdown.Token);
         RestartRefreshLoop();
 
         if (_configuration.Targets.Count == 0)
@@ -106,11 +110,11 @@ public partial class App : System.Windows.Application
         base.OnExit(eventArgs);
     }
 
-    private async Task RefreshOnceAsync(CancellationToken cancellationToken)
+    private async Task<bool> RefreshOnceAsync(CancellationToken cancellationToken)
     {
         if (_stateService is null || _overlayViewModel is null)
         {
-            return;
+            return false;
         }
 
         await _refreshGate.WaitAsync(cancellationToken);
@@ -119,11 +123,25 @@ public partial class App : System.Windows.Application
             _currentState = await _stateService.RefreshAsync(cancellationToken);
             await Dispatcher.InvokeAsync(
                 () => _overlayViewModel.Apply(_currentState, _configuration.Opacity));
+            return !_currentState.IsStale;
         }
         finally
         {
             _refreshGate.Release();
         }
+    }
+
+    private Task<bool> RefreshWithRetryAsync(CancellationToken cancellationToken)
+    {
+        if (_refreshScheduler is null)
+        {
+            return Task.FromResult(false);
+        }
+
+        return _refreshScheduler.RunRoundAsync(
+            _configuration.RefreshMinutes,
+            RefreshOnceAsync,
+            cancellationToken);
     }
 
     private async Task SavePositionAsync(double left, double top)
@@ -149,14 +167,19 @@ public partial class App : System.Windows.Application
 
     private async Task RunRefreshLoopAsync(CancellationToken cancellationToken)
     {
+        if (_refreshScheduler is null)
+        {
+            return;
+        }
+
         try
         {
             while (true)
             {
-                await Task.Delay(
-                    TimeSpan.FromMinutes(_configuration.RefreshMinutes),
+                await _refreshScheduler.WaitForNextBoundaryAsync(
+                    _configuration.RefreshMinutes,
                     cancellationToken);
-                await RefreshOnceAsync(cancellationToken);
+                await RefreshWithRetryAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -236,7 +259,7 @@ public partial class App : System.Windows.Application
         _overlayViewModel?.Apply(_currentState, updated.Opacity);
         RestartRefreshLoop();
         UpdateTray();
-        await RefreshOnceAsync(_shutdown.Token);
+        await RefreshWithRetryAsync(_shutdown.Token);
     }
 
     private async Task ToggleAutostartAsync()
