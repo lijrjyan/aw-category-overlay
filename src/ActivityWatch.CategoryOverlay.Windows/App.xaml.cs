@@ -70,6 +70,11 @@ public partial class App : System.Windows.Application
         UpdateTray();
         await RefreshOnceAsync(_shutdown.Token);
         RestartRefreshLoop();
+
+        if (_configuration.Targets.Count == 0)
+        {
+            OpenSettings();
+        }
     }
 
     protected override void OnExit(System.Windows.ExitEventArgs eventArgs)

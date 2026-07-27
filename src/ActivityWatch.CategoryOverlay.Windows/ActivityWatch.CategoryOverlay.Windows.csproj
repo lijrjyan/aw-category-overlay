@@ -7,9 +7,12 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <AssemblyName>ActivityWatch.CategoryOverlay</AssemblyName>
     <RootNamespace>ActivityWatch.CategoryOverlay.Windows</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ActivityWatch.CategoryOverlay.Core\ActivityWatch.CategoryOverlay.Core.csproj" />
   </ItemGroup>
 </Project>
-
