@@ -61,6 +61,16 @@ public sealed class OverlayWindowMarkupTests
     }
 
     [Fact]
+    public void Apply_updates_existing_rows_without_clearing_the_collection()
+    {
+        var source = File.ReadAllText(GetOverlayViewModelPath());
+
+        Assert.DoesNotContain("Rows.Clear()", source);
+        Assert.Contains("Rows[index].Apply(state.Rows[index])", source);
+        Assert.Contains("Rows.RemoveAt(Rows.Count - 1)", source);
+    }
+
+    [Fact]
     public void Overlay_uses_approved_width_and_configurable_bar_font_size()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
