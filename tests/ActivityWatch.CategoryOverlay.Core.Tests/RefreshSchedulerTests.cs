@@ -9,6 +9,8 @@ public sealed class RefreshSchedulerTests
     [InlineData("2026-07-27T10:02:17-07:00", 5, "2026-07-27T10:05:00-07:00")]
     [InlineData("2026-07-27T10:05:00-07:00", 5, "2026-07-27T10:10:00-07:00")]
     [InlineData("2026-07-27T10:09:59-07:00", 10, "2026-07-27T10:10:00-07:00")]
+    [InlineData("2026-03-08T01:59:30-08:00", 5, "2026-03-08T03:00:00-07:00")]
+    [InlineData("2026-11-01T01:59:30-07:00", 5, "2026-11-01T01:00:00-08:00")]
     public void GetNextBoundary_returns_next_exclusive_local_boundary(
         string now,
         int intervalMinutes,

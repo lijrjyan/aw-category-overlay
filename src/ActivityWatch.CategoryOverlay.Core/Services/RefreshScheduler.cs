@@ -17,13 +17,21 @@ public sealed class RefreshScheduler(IClock clock, IAsyncDelay delay)
             throw new ArgumentOutOfRangeException(nameof(intervalMinutes));
         }
 
-        var local = TimeZoneInfo.ConvertTime(clock.Now, clock.LocalTimeZone);
-        var intervalTicks = TimeSpan.FromMinutes(intervalMinutes).Ticks;
-        var elapsedTicks = local.TimeOfDay.Ticks;
-        var nextTicks = ((elapsedTicks / intervalTicks) + 1) * intervalTicks;
-        var nextLocal = local.Date.AddTicks(nextTicks);
-        var offset = clock.LocalTimeZone.GetUtcOffset(nextLocal);
-        return new DateTimeOffset(nextLocal, offset);
+        var candidate = clock.Now
+            .AddTicks(-(clock.Now.Ticks % TimeSpan.TicksPerMinute))
+            .AddMinutes(1);
+        for (var minute = 0; minute <= intervalMinutes; minute++)
+        {
+            var local = TimeZoneInfo.ConvertTime(candidate, clock.LocalTimeZone);
+            if (local.Minute % intervalMinutes == 0)
+            {
+                return local;
+            }
+
+            candidate = candidate.AddMinutes(1);
+        }
+
+        throw new InvalidOperationException("No aligned refresh boundary found.");
     }
 
     public async Task WaitForNextBoundaryAsync(
