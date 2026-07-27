@@ -29,7 +29,7 @@ public sealed class OverlayWindowMarkupTests
                 (string?)element.Attribute("Style") ==
                 "{StaticResource CategoryBarText}");
 
-        Assert.Equal("12", fontSize);
+        Assert.Equal("13", fontSize);
         Assert.Equal(3, styledTextBlocks);
     }
 
