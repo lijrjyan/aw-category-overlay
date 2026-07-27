@@ -12,6 +12,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
     private string _lastRefreshText = "--:--";
     private double _headerOpacity = 0.62;
     private double _overlayOpacity = 0.72;
+    private int _barFontSize = 16;
 
     public ObservableCollection<OverlayRowViewModel> Rows { get; } = [];
 
@@ -33,9 +34,15 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
         private set => SetField(ref _overlayOpacity, value);
     }
 
+    public int BarFontSize
+    {
+        get => _barFontSize;
+        private set => SetField(ref _barFontSize, value);
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void Apply(OverlayState state, double opacity)
+    public void Apply(OverlayState state, double opacity, int barFontSize)
     {
         Rows.Clear();
         foreach (var row in state.Rows)
@@ -47,6 +54,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
             ?? "--:--";
         HeaderOpacity = state.IsStale ? 0.35 : 0.62;
         OverlayOpacity = Math.Clamp(opacity, 0.35, 1.0);
+        BarFontSize = Math.Clamp(barFontSize, 10, 24);
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)

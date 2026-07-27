@@ -65,6 +65,10 @@ public partial class App : System.Windows.Application
             _configuration);
         _refreshScheduler = new RefreshScheduler(_clock, _delay);
         _overlayViewModel = new OverlayViewModel();
+        _overlayViewModel.Apply(
+            _currentState,
+            _configuration.Opacity,
+            _configuration.BarFontSize);
         _overlayWindow = new OverlayWindow(
             _overlayViewModel,
             _configuration,
@@ -122,7 +126,10 @@ public partial class App : System.Windows.Application
         {
             _currentState = await _stateService.RefreshAsync(cancellationToken);
             await Dispatcher.InvokeAsync(
-                () => _overlayViewModel.Apply(_currentState, _configuration.Opacity));
+                () => _overlayViewModel.Apply(
+                    _currentState,
+                    _configuration.Opacity,
+                    _configuration.BarFontSize));
             return !_currentState.IsStale;
         }
         finally
@@ -252,14 +259,28 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        await _configurationStore.SaveAsync(updated, _shutdown.Token);
         _configuration = updated;
         _stateService?.UpdateConfiguration(updated);
-        await _configurationStore.SaveAsync(updated, _shutdown.Token);
         ApplyAutostart(updated.StartWithWindows);
-        _overlayViewModel?.Apply(_currentState, updated.Opacity);
+        _overlayViewModel?.Apply(
+            _currentState,
+            updated.Opacity,
+            updated.BarFontSize);
         RestartRefreshLoop();
         UpdateTray();
-        await RefreshWithRetryAsync(_shutdown.Token);
+        _ = RefreshAfterSettingsAsync(_shutdown.Token);
+    }
+
+    private async Task RefreshAfterSettingsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await RefreshWithRetryAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
     }
 
     private async Task ToggleAutostartAsync()

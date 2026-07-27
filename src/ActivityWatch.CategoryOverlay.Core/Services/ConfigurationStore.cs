@@ -48,6 +48,13 @@ public sealed class ConfigurationStore(string path)
                 "Refresh interval must be 5 or 10 minutes.");
         }
 
+        if (configuration.BarFontSize is < 10 or > 24)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(configuration),
+                "Bar font size must be between 10 and 24.");
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         var temporary = path + ".tmp";
         await using (var stream = File.Create(temporary))

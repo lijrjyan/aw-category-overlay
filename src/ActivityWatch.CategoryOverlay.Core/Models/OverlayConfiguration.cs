@@ -10,6 +10,8 @@ public sealed record OverlayConfiguration
 
     public double Opacity { get; init; } = 0.60;
 
+    public int BarFontSize { get; init; } = 16;
+
     public double? Left { get; init; }
 
     public double Top { get; init; } = 16;

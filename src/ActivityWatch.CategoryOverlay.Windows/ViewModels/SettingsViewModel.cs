@@ -9,6 +9,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 {
     private int _refreshMinutes;
     private double _opacity;
+    private int _barFontSize;
     private bool _startWithWindows;
     private string _validationMessage = string.Empty;
 
@@ -33,6 +34,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                         path => path.SequenceEqual(target.Path, StringComparer.Ordinal)))));
         _refreshMinutes = configuration.RefreshMinutes;
         _opacity = configuration.Opacity;
+        _barFontSize = configuration.BarFontSize;
         _startWithWindows = configuration.StartWithWindows;
     }
 
@@ -55,6 +57,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         get => _opacity;
         set => SetField(ref _opacity, value);
+    }
+
+    public int BarFontSize
+    {
+        get => _barFontSize;
+        set => SetField(ref _barFontSize, value);
     }
 
     public bool StartWithWindows
@@ -116,6 +124,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             return false;
         }
 
+        if (BarFontSize is < 10 or > 24)
+        {
+            ValidationMessage = "Bar font size must be 10–24.";
+            configuration = existing;
+            return false;
+        }
+
         var targets = new List<CategoryTarget>();
         for (var index = 0; index < Targets.Count; index++)
         {
@@ -152,10 +167,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         {
             RefreshMinutes = RefreshMinutes,
             Opacity = Math.Clamp(Opacity, 0.35, 1.0),
+            BarFontSize = BarFontSize,
             StartWithWindows = StartWithWindows,
             Targets = targets,
         };
         return true;
+    }
+
+    public void SetValidationMessage(string message)
+    {
+        ValidationMessage = message;
     }
 
     private static string PathKey(IReadOnlyList<string> path)

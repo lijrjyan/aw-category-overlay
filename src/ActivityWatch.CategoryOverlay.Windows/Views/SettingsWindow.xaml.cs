@@ -63,12 +63,20 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        await _save(updated);
-        DialogResult = true;
+        try
+        {
+            await _save(updated);
+            Close();
+        }
+        catch (Exception exception)
+        {
+            _viewModel.SetValidationMessage(
+                $"Could not save settings: {exception.Message}");
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs eventArgs)
     {
-        DialogResult = false;
+        Close();
     }
 }

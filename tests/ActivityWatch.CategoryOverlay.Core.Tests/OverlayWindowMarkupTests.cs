@@ -6,7 +6,7 @@ namespace ActivityWatch.CategoryOverlay.Core.Tests;
 public sealed class OverlayWindowMarkupTests
 {
     [Fact]
-    public void Category_bar_text_style_uses_approved_font_size()
+    public void Overlay_uses_approved_width_and_configurable_bar_font_size()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
         XNamespace presentation =
@@ -18,18 +18,23 @@ public sealed class OverlayWindowMarkupTests
             .Descendants(presentation + "Style")
             .Single(element =>
                 (string?)element.Attribute(x + "Key") == "CategoryBarText");
-        var fontSize = style
+        var fontSizeSetter = style
             .Elements(presentation + "Setter")
             .Single(element =>
-                (string?)element.Attribute("Property") == "FontSize")
-            .Attribute("Value")?.Value;
+                (string?)element.Attribute("Property") == "FontSize");
+        var fontSizeBinding = fontSizeSetter
+            .Descendants(presentation + "Binding")
+            .Single();
         var styledTextBlocks = document
             .Descendants(presentation + "TextBlock")
             .Count(element =>
                 (string?)element.Attribute("Style") ==
                 "{StaticResource CategoryBarText}");
 
-        Assert.Equal("16", fontSize);
+        Assert.Equal("440", document.Root?.Attribute("Width")?.Value);
+        Assert.Equal(
+            "DataContext.BarFontSize",
+            fontSizeBinding.Attribute("Path")?.Value);
         Assert.Equal(3, styledTextBlocks);
     }
 

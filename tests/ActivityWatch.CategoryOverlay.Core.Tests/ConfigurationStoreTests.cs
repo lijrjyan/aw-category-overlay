@@ -16,6 +16,7 @@ public sealed class ConfigurationStoreTests : IDisposable
         var config = OverlayConfiguration.Default with
         {
             RefreshMinutes = 10,
+            BarFontSize = 18,
             Targets =
             [
                 new(
@@ -31,6 +32,7 @@ public sealed class ConfigurationStoreTests : IDisposable
 
         Assert.Equal(config.RefreshMinutes, loaded.RefreshMinutes);
         Assert.Equal(config.ServerUrl, loaded.ServerUrl);
+        Assert.Equal(config.BarFontSize, loaded.BarFontSize);
         Assert.Collection(
             loaded.Targets,
             target =>
@@ -65,6 +67,7 @@ public sealed class ConfigurationStoreTests : IDisposable
         var configuration = await store.LoadAsync(CancellationToken.None);
 
         Assert.Equal(0.60, configuration.Opacity);
+        Assert.Equal(16, configuration.BarFontSize);
     }
 
     [Theory]
@@ -74,6 +77,18 @@ public sealed class ConfigurationStoreTests : IDisposable
     {
         var store = new ConfigurationStore(Path.Combine(_directory, "config.json"));
         var config = OverlayConfiguration.Default with { RefreshMinutes = refreshMinutes };
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => store.SaveAsync(config, CancellationToken.None));
+    }
+
+    [Theory]
+    [InlineData(9)]
+    [InlineData(25)]
+    public async Task Save_rejects_unsupported_bar_font_size(int barFontSize)
+    {
+        var store = new ConfigurationStore(Path.Combine(_directory, "config.json"));
+        var config = OverlayConfiguration.Default with { BarFontSize = barFontSize };
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => store.SaveAsync(config, CancellationToken.None));
