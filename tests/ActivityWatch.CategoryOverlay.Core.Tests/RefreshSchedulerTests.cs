@@ -102,6 +102,63 @@ public sealed class RefreshSchedulerTests
     }
 
     [Fact]
+    public async Task RunRound_treats_refresh_exceptions_as_failed_attempts()
+    {
+        var clock = new MutableClock(
+            DateTimeOffset.Parse("2026-07-27T10:01:00-07:00"));
+        var delay = new AdvancingDelay(clock);
+        var scheduler = new RefreshScheduler(clock, delay);
+        var attempts = 0;
+
+        var succeeded = await scheduler.RunRoundAsync(
+            5,
+            _ =>
+            {
+                attempts++;
+                return attempts < 3
+                    ? Task.FromException<bool>(new InvalidOperationException("query failed"))
+                    : Task.FromResult(true);
+            },
+            CancellationToken.None);
+
+        Assert.True(succeeded);
+        Assert.Equal(3, attempts);
+        Assert.Equal(
+            [TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20)],
+            delay.Delays);
+    }
+
+    [Fact]
+    public async Task RunRound_propagates_requested_cancellation()
+    {
+        var clock = new MutableClock(
+            DateTimeOffset.Parse("2026-07-27T10:01:00-07:00"));
+        var scheduler = new RefreshScheduler(clock, new AdvancingDelay(clock));
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => scheduler.RunRoundAsync(
+                5,
+                token => Task.FromCanceled<bool>(token),
+                cancellation.Token));
+    }
+
+    [Fact]
+    public void GetNextBoundary_uses_one_clock_snapshot()
+    {
+        var clock = new SingleReadClock(
+            DateTimeOffset.Parse("2026-07-27T10:04:59.9999999-07:00"));
+        var scheduler = new RefreshScheduler(clock, new NoOpDelay());
+
+        var boundary = scheduler.GetNextBoundary(5);
+
+        Assert.Equal(
+            DateTimeOffset.Parse("2026-07-27T10:05:00-07:00"),
+            boundary);
+    }
+
+    [Fact]
     public void GetNextBoundary_rejects_unsupported_interval()
     {
         var clock = new MutableClock(
@@ -131,5 +188,24 @@ public sealed class RefreshSchedulerTests
             clock.Now += delay;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class SingleReadClock(DateTimeOffset now) : IClock
+    {
+        private int _reads;
+
+        public DateTimeOffset Now =>
+            Interlocked.Increment(ref _reads) == 1
+                ? now
+                : throw new InvalidOperationException("Clock read more than once.");
+
+        public TimeZoneInfo LocalTimeZone { get; } =
+            TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
+    }
+
+    private sealed class NoOpDelay : IAsyncDelay
+    {
+        public Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }

@@ -17,8 +17,9 @@ public sealed class RefreshScheduler(IClock clock, IAsyncDelay delay)
             throw new ArgumentOutOfRangeException(nameof(intervalMinutes));
         }
 
-        var candidate = clock.Now
-            .AddTicks(-(clock.Now.Ticks % TimeSpan.TicksPerMinute))
+        var now = clock.Now;
+        var candidate = now
+            .AddTicks(-(now.Ticks % TimeSpan.TicksPerMinute))
             .AddMinutes(1);
         for (var minute = 0; minute <= intervalMinutes; minute++)
         {
@@ -52,7 +53,7 @@ public sealed class RefreshScheduler(IClock clock, IAsyncDelay delay)
     {
         var startedAt = clock.Now;
         var boundary = GetNextBoundary(intervalMinutes);
-        if (await refresh(cancellationToken))
+        if (await TryRefreshAsync(refresh, cancellationToken))
         {
             return true;
         }
@@ -71,12 +72,30 @@ public sealed class RefreshScheduler(IClock clock, IAsyncDelay delay)
                 await delay.DelayAsync(wait, cancellationToken);
             }
 
-            if (await refresh(cancellationToken))
+            if (await TryRefreshAsync(refresh, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static async Task<bool> TryRefreshAsync(
+        Func<CancellationToken, Task<bool>> refresh,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await refresh(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }
