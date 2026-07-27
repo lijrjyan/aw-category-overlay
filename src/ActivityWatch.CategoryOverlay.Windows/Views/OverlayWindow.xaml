@@ -58,26 +58,17 @@
     </Border.Effect>
     <StackPanel>
       <Grid Margin="1,0,1,13" Opacity="{Binding HeaderOpacity}">
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock Text="TODAY"
-                     Foreground="White"
-                     FontFamily="Segoe UI"
-                     FontSize="15"
-                     FontWeight="SemiBold"
-                     VerticalAlignment="Center" />
-          <TextBlock Text="{Binding TotalText}"
-                     Margin="10,0,0,0"
-                     Foreground="White"
-                     FontFamily="Segoe UI"
-                     FontSize="18"
-                     FontWeight="Bold"
-                     VerticalAlignment="Center" />
-        </StackPanel>
+        <TextBlock Text="{Binding HeaderText}"
+                   Foreground="White"
+                   FontFamily="Segoe UI"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
         <TextBlock Text="{Binding LastRefreshText}"
                    HorizontalAlignment="Right"
                    Foreground="White"
                    FontFamily="Segoe UI"
-                   FontSize="10" />
+                   FontSize="16" />
       </Grid>
 
       <ItemsControl ItemsSource="{Binding Rows}">
@@ -115,13 +106,12 @@
                         Background="#C8FFFFFF" />
                 <Grid Grid.Column="1">
                   <TextBlock Text="{Binding RequirementText}"
+                             Style="{StaticResource CategoryBarText}"
                              HorizontalAlignment="Left"
                              VerticalAlignment="Center"
                              Margin="9,0,0,0"
                              Foreground="#A8FFFFFF"
-                             FontFamily="Segoe UI"
-                             FontSize="10"
-                             FontWeight="SemiBold" />
+                             FontWeight="Bold" />
                   <TextBlock Text="{Binding ActualText}"
                              Style="{StaticResource CategoryBarText}"
                              HorizontalAlignment="Right"

@@ -19,8 +19,8 @@ public static class OverlayText
     {
         return direction switch
         {
-            ThresholdDirection.Minimum => "MIN ·",
-            ThresholdDirection.Maximum => "MAX ·",
+            ThresholdDirection.Minimum => "MIN",
+            ThresholdDirection.Maximum => "MAX",
             _ => throw new ArgumentOutOfRangeException(nameof(direction)),
         };
     }

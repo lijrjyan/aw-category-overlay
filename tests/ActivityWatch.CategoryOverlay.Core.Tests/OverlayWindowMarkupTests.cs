@@ -6,20 +6,22 @@ namespace ActivityWatch.CategoryOverlay.Core.Tests;
 public sealed class OverlayWindowMarkupTests
 {
     [Fact]
-    public void Header_emphasizes_today_and_total_time_separately()
+    public void Header_and_last_refresh_use_unified_16px_text()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
         XNamespace presentation =
             "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
-        var today = document
+        var header = document
             .Descendants(presentation + "TextBlock")
-            .Single(element => (string?)element.Attribute("Text") == "TODAY");
-        var total = document
+            .Single(element =>
+                (string?)element.Attribute("Text") == "{Binding HeaderText}");
+        var lastRefresh = document
             .Descendants(presentation + "TextBlock")
-            .Single(element => (string?)element.Attribute("Text") == "{Binding TotalText}");
+            .Single(element =>
+                (string?)element.Attribute("Text") == "{Binding LastRefreshText}");
 
-        Assert.Equal("15", today.Attribute("FontSize")?.Value);
-        Assert.Equal("18", total.Attribute("FontSize")?.Value);
+        Assert.Equal("16", header.Attribute("FontSize")?.Value);
+        Assert.Equal("16", lastRefresh.Attribute("FontSize")?.Value);
     }
 
     [Fact]
@@ -37,6 +39,10 @@ public sealed class OverlayWindowMarkupTests
             .First(element => element.Attribute("Grid.Column") is not null);
 
         Assert.Equal("1", rightColumn.Attribute("Grid.Column")?.Value);
+        Assert.Equal(
+            "{StaticResource CategoryBarText}",
+            requirement.Attribute("Style")?.Value);
+        Assert.Equal("Bold", requirement.Attribute("FontWeight")?.Value);
     }
 
     [Fact]
@@ -44,9 +50,9 @@ public sealed class OverlayWindowMarkupTests
     {
         var source = File.ReadAllText(GetOverlayViewModelPath());
 
-        Assert.Contains("TotalText", source);
+        Assert.Contains("HeaderText", source);
         Assert.Contains("RequirementText", source);
-        Assert.DoesNotContain("HeaderText", source);
+        Assert.DoesNotContain("TotalText", source);
     }
 
     [Fact]
@@ -79,7 +85,7 @@ public sealed class OverlayWindowMarkupTests
         Assert.Equal(
             "DataContext.BarFontSize",
             fontSizeBinding.Attribute("Path")?.Value);
-        Assert.Equal(3, styledTextBlocks);
+        Assert.Equal(4, styledTextBlocks);
     }
 
     private static string GetOverlayXamlPath(

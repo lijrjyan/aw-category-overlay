@@ -19,8 +19,8 @@ public sealed class OverlayTextTests
     }
 
     [Theory]
-    [InlineData(ThresholdDirection.Minimum, "MIN ·")]
-    [InlineData(ThresholdDirection.Maximum, "MAX ·")]
+    [InlineData(ThresholdDirection.Minimum, "MIN")]
+    [InlineData(ThresholdDirection.Maximum, "MAX")]
     public void FormatDirection_uses_compact_requirement_labels(
         ThresholdDirection direction,
         string expected)
