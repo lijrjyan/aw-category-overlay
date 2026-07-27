@@ -11,6 +11,7 @@
     <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <DebugType>embedded</DebugType>
+    <ApplicationIcon>Assets\category-overlay.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ActivityWatch.CategoryOverlay.Core\ActivityWatch.CategoryOverlay.Core.csproj" />

@@ -4,6 +4,7 @@ namespace ActivityWatch.CategoryOverlay.Windows.Services;
 
 public sealed class TrayService : IDisposable
 {
+    private readonly Icon? _ownedIcon;
     private readonly System.Windows.Forms.NotifyIcon _notifyIcon;
     private readonly System.Windows.Forms.ToolStripMenuItem _visibilityItem;
     private readonly System.Windows.Forms.ToolStripMenuItem _editItem;
@@ -53,10 +54,11 @@ public sealed class TrayService : IDisposable
             exitItem,
         ]);
 
+        _ownedIcon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         _notifyIcon = new System.Windows.Forms.NotifyIcon
         {
             Text = "ActivityWatch Category Overlay",
-            Icon = SystemIcons.Application,
+            Icon = _ownedIcon ?? SystemIcons.Application,
             ContextMenuStrip = menu,
             Visible = true,
         };
@@ -75,5 +77,6 @@ public sealed class TrayService : IDisposable
         _notifyIcon.Visible = false;
         _notifyIcon.ContextMenuStrip?.Dispose();
         _notifyIcon.Dispose();
+        _ownedIcon?.Dispose();
     }
 }
