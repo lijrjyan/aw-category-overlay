@@ -9,7 +9,7 @@ namespace ActivityWatch.CategoryOverlay.Windows.ViewModels;
 
 public sealed class OverlayViewModel : INotifyPropertyChanged
 {
-    private string _headerText = "TODAY · 0m";
+    private string _totalDurationText = "0m";
     private string _lastRefreshText = "--:--";
     private double _headerOpacity = 0.62;
     private double _overlayOpacity = 0.72;
@@ -17,10 +17,10 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
 
     public ObservableCollection<OverlayRowViewModel> Rows { get; } = [];
 
-    public string HeaderText
+    public string TotalDurationText
     {
-        get => _headerText;
-        private set => SetField(ref _headerText, value);
+        get => _totalDurationText;
+        private set => SetField(ref _totalDurationText, value);
     }
 
     public string LastRefreshText
@@ -57,7 +57,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
             Rows.Add(OverlayRowViewModel.From(row));
         }
 
-        HeaderText = $"TODAY · {OverlayText.FormatDuration(state.TotalActiveTime)}";
+        TotalDurationText = OverlayText.FormatDuration(state.TotalActiveTime);
         LastRefreshText = state.LastSuccessfulRefresh?.ToLocalTime().ToString("HH:mm")
             ?? "--:--";
         HeaderOpacity = state.IsStale ? 0.35 : 0.62;

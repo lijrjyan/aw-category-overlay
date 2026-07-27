@@ -6,22 +6,26 @@ namespace ActivityWatch.CategoryOverlay.Core.Tests;
 public sealed class OverlayWindowMarkupTests
 {
     [Fact]
-    public void Header_and_last_refresh_use_unified_16px_text()
+    public void Total_duration_and_last_refresh_use_identical_typography()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
         XNamespace presentation =
             "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
-        var header = document
+        var totalDuration = document
             .Descendants(presentation + "TextBlock")
             .Single(element =>
-                (string?)element.Attribute("Text") == "{Binding HeaderText}");
+                (string?)element.Attribute("Text") == "{Binding TotalDurationText}");
         var lastRefresh = document
             .Descendants(presentation + "TextBlock")
             .Single(element =>
                 (string?)element.Attribute("Text") == "{Binding LastRefreshText}");
 
-        Assert.Equal("16", header.Attribute("FontSize")?.Value);
-        Assert.Equal("16", lastRefresh.Attribute("FontSize")?.Value);
+        foreach (var text in new[] { totalDuration, lastRefresh })
+        {
+            Assert.Equal("Segoe UI", text.Attribute("FontFamily")?.Value);
+            Assert.Equal("16", text.Attribute("FontSize")?.Value);
+            Assert.Equal("Normal", text.Attribute("FontWeight")?.Value);
+        }
     }
 
     [Fact]
@@ -50,8 +54,9 @@ public sealed class OverlayWindowMarkupTests
     {
         var source = File.ReadAllText(GetOverlayViewModelPath());
 
-        Assert.Contains("HeaderText", source);
+        Assert.Contains("TotalDurationText", source);
         Assert.Contains("RequirementText", source);
+        Assert.DoesNotContain("HeaderText", source);
         Assert.DoesNotContain("TotalText", source);
     }
 
