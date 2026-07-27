@@ -13,7 +13,7 @@
   <Window.Resources>
     <Style x:Key="CategoryBarText" TargetType="TextBlock">
       <Setter Property="FontFamily" Value="Segoe UI" />
-      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontSize" Value="16" />
     </Style>
     <Style x:Key="OverlayProgress" TargetType="ProgressBar">
       <Setter Property="Background" Value="#1FFFFFFF" />
