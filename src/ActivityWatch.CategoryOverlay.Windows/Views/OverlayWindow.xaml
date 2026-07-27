@@ -59,7 +59,7 @@
     <StackPanel>
       <Grid Margin="1,0,1,13" Opacity="{Binding HeaderOpacity}">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock Text="LAST UPDATE · "
+          <TextBlock Text="LAST UPDATED · "
                      Foreground="White"
                      FontFamily="Segoe UI"
                      FontSize="16"

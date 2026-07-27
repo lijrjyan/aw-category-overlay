@@ -44,14 +44,14 @@ public sealed class OverlayWindowMarkupTests
 
         Assert.Contains(
             textBlocks,
-            element => (string?)element.Attribute("Text") == "LAST UPDATE · ");
+            element => (string?)element.Attribute("Text") == "LAST UPDATED · ");
         Assert.DoesNotContain(
             textBlocks,
             element => (string?)element.Attribute("Text") == "TODAY · ");
         Assert.Equal(
             lastRefresh.Parent,
             textBlocks.Single(element =>
-                (string?)element.Attribute("Text") == "LAST UPDATE · ").Parent);
+                (string?)element.Attribute("Text") == "LAST UPDATED · ").Parent);
         Assert.Equal(
             "Right",
             totalDuration.Attribute("HorizontalAlignment")?.Value);
