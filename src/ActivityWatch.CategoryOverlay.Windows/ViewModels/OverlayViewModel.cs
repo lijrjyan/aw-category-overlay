@@ -12,7 +12,7 @@ namespace ActivityWatch.CategoryOverlay.Windows.ViewModels;
 
 public sealed class OverlayViewModel : INotifyPropertyChanged
 {
-    private string _totalDurationText = "0s";
+    private string _totalDurationText = "00:00";
     private string _lastRefreshText = "--:--";
     private double _headerOpacity = 0.62;
     private double _overlayOpacity = 0.72;

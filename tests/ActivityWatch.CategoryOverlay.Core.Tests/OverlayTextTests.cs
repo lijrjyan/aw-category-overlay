@@ -19,9 +19,9 @@ public sealed class OverlayTextTests
     }
 
     [Theory]
-    [InlineData(0, "0s")]
-    [InlineData(3039, "50m 39s")]
-    [InlineData(3723, "1h 2m 3s")]
+    [InlineData(0, "00:00")]
+    [InlineData(3039, "50:39")]
+    [InlineData(3723, "01:02:03")]
     public void FormatElapsedDuration_keeps_second_precision(
         int seconds,
         string expected)
@@ -35,15 +35,15 @@ public sealed class OverlayTextTests
     public void FormatElapsedDuration_clamps_negative_values()
     {
         Assert.Equal(
-            "0s",
+            "00:00",
             OverlayText.FormatElapsedDuration(TimeSpan.FromSeconds(-1)));
     }
 
     [Fact]
-    public void FormatElapsedDuration_floors_fractional_seconds_like_web_ui()
+    public void FormatElapsedDuration_floors_fractional_seconds()
     {
         Assert.Equal(
-            "50m 39s",
+            "50:39",
             OverlayText.FormatElapsedDuration(TimeSpan.FromSeconds(3039.99)));
     }
 

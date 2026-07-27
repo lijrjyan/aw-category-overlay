@@ -21,20 +21,9 @@ public static class OverlayText
         var hours = totalSeconds / 3600;
         var minutes = totalSeconds / 60 % 60;
         var seconds = totalSeconds % 60;
-        var parts = new List<string>(3);
-
-        if (hours > 0)
-        {
-            parts.Add($"{hours}h");
-            parts.Add($"{minutes}m");
-        }
-        else if (minutes > 0)
-        {
-            parts.Add($"{minutes}m");
-        }
-
-        parts.Add($"{seconds}s");
-        return string.Join(' ', parts);
+        return hours > 0
+            ? $"{hours:00}:{minutes:00}:{seconds:00}"
+            : $"{minutes:00}:{seconds:00}";
     }
 
     public static string FormatDirection(ThresholdDirection direction)
