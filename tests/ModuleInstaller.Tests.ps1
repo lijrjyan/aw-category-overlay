@@ -49,6 +49,7 @@ Describe "ActivityWatch category overlay module installer" {
         (Get-Content $overlayConfigPath -Raw |
             ConvertFrom-Json).startWithWindows | Should Be $false
         @(Get-ChildItem "$awQtConfigPath.backup-*").Count | Should Be 1
+        @(Get-ChildItem "$overlayConfigPath.backup-*").Count | Should Be 1
     }
 
     It "is idempotent and keeps one overlay module entry" {

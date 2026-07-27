@@ -100,8 +100,8 @@ $updatedConfig = Get-UpdatedModuleConfig `
 if ($PSCmdlet.ShouldProcess(
         $ActivityWatchDirectory,
         "Install ActivityWatch category overlay module")) {
-    $backupPath = "$AwQtConfigPath.backup-" +
-        (Get-Date -Format "yyyyMMddHHmmssfff")
+    $backupStamp = Get-Date -Format "yyyyMMddHHmmssfff"
+    $backupPath = "$AwQtConfigPath.backup-$backupStamp"
     Copy-Item $AwQtConfigPath $backupPath
     Copy-Item $SourceExecutable $destination -Force
     [IO.File]::WriteAllText(
@@ -110,6 +110,7 @@ if ($PSCmdlet.ShouldProcess(
         [Text.UTF8Encoding]::new($false))
 
     if (Test-Path $OverlayConfigPath -PathType Leaf) {
+        Copy-Item $OverlayConfigPath "$OverlayConfigPath.backup-$backupStamp"
         $overlayConfig = Get-Content $OverlayConfigPath -Raw |
             ConvertFrom-Json
         if ($null -eq $overlayConfig.startWithWindows) {
