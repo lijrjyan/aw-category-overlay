@@ -58,7 +58,7 @@
     </Border.Effect>
     <StackPanel>
       <Grid Margin="1,0,1,13" Opacity="{Binding HeaderOpacity}">
-        <TextBlock Text="TODAY · TOP CATEGORIES"
+        <TextBlock Text="{Binding HeaderText}"
                    Foreground="White"
                    FontFamily="Segoe UI"
                    FontSize="12"

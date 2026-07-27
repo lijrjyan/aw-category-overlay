@@ -33,6 +33,44 @@ public sealed class OverlayStateServiceTests
     }
 
     [Fact]
+    public async Task Refresh_sums_descendant_durations_for_parent_target()
+    {
+        var client = FakeActivityWatchClient.Returning(
+            Snapshot(
+                [["Entertainment"], ["Entertainment", "AI × Game"]],
+                [
+                    new CategoryDuration(
+                        ["Entertainment", "AI × Game"],
+                        TimeSpan.FromSeconds(456)),
+                ]));
+        var service = CreateService(client, [Target(["Entertainment"], 0)]);
+
+        var state = await service.RefreshAsync(CancellationToken.None);
+
+        var row = Assert.Single(state.Rows);
+        Assert.Equal(TimeSpan.FromSeconds(456), row.Actual);
+    }
+
+    [Fact]
+    public async Task Refresh_exposes_total_active_time()
+    {
+        var client = FakeActivityWatchClient.Returning(
+            Snapshot(
+                [["Work"], ["Entertainment"]],
+                [
+                    new CategoryDuration(["Work"], TimeSpan.FromMinutes(90)),
+                    new CategoryDuration(["Entertainment"], TimeSpan.FromMinutes(20)),
+                ]));
+        var service = CreateService(client, [Target(["Work"], 0)]);
+
+        var state = await service.RefreshAsync(CancellationToken.None);
+
+        var property = state.GetType().GetProperty("TotalActiveTime");
+        Assert.NotNull(property);
+        Assert.Equal(TimeSpan.FromMinutes(110), property.GetValue(state));
+    }
+
+    [Fact]
     public async Task Failed_refresh_preserves_last_rows_and_marks_state_stale()
     {
         var client = FakeActivityWatchClient.ReturnThenThrow(

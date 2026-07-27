@@ -5,11 +5,17 @@ namespace ActivityWatch.CategoryOverlay.Core.Services;
 
 public sealed record OverlayState(
     IReadOnlyList<OverlayRowState> Rows,
+    TimeSpan TotalActiveTime,
     DateTimeOffset? LastSuccessfulRefresh,
     bool IsStale,
     IReadOnlyList<IReadOnlyList<string>> AvailableCategories)
 {
-    public static OverlayState Empty { get; } = new([], null, true, []);
+    public static OverlayState Empty { get; } = new(
+        [],
+        TimeSpan.Zero,
+        null,
+        true,
+        []);
 }
 
 public sealed class OverlayStateService(
@@ -56,20 +62,20 @@ public sealed class OverlayStateService(
             }
 
             var available = snapshot.AvailableCategories.ToHashSet(PathComparer);
-            var durations = snapshot.Durations.ToDictionary(
-                duration => duration.Path,
-                duration => duration.Duration,
-                PathComparer);
+            var totalActiveTime = snapshot.Durations.Aggregate(
+                TimeSpan.Zero,
+                (total, duration) => total + duration.Duration);
             var rows = _configuration.Targets
                 .Where(target => available.Contains(target.Path))
                 .OrderBy(target => target.Order)
                 .Select(target => ThresholdEvaluator.Evaluate(
                     target,
-                    durations.GetValueOrDefault(target.Path, TimeSpan.Zero)))
+                    SumDuration(target.Path, snapshot.Durations)))
                 .ToList();
 
             _state = new OverlayState(
                 rows,
+                totalActiveTime,
                 clock.Now,
                 false,
                 snapshot.AvailableCategories);
@@ -85,6 +91,27 @@ public sealed class OverlayStateService(
             _state = _state with { IsStale = true };
             return _state;
         }
+    }
+
+    private static TimeSpan SumDuration(
+        IReadOnlyList<string> targetPath,
+        IReadOnlyList<CategoryDuration> durations)
+    {
+        return durations
+            .Where(duration => IsPathPrefix(targetPath, duration.Path))
+            .Aggregate(
+                TimeSpan.Zero,
+                (total, duration) => total + duration.Duration);
+    }
+
+    private static bool IsPathPrefix(
+        IReadOnlyList<string> prefix,
+        IReadOnlyList<string> path)
+    {
+        return prefix.Count <= path.Count
+            && prefix.SequenceEqual(
+                path.Take(prefix.Count),
+                StringComparer.Ordinal);
     }
 
     private sealed class CategoryPathComparer :

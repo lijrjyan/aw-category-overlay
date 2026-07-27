@@ -6,6 +6,22 @@ namespace ActivityWatch.CategoryOverlay.Core.Tests;
 public sealed class OverlayWindowMarkupTests
 {
     [Fact]
+    public void Header_shows_total_time_instead_of_top_categories_label()
+    {
+        var document = XDocument.Load(GetOverlayXamlPath());
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var header = document
+            .Descendants(presentation + "TextBlock")
+            .Single(element => (string?)element.Attribute("Text") == "{Binding HeaderText}");
+
+        Assert.NotNull(header);
+        Assert.DoesNotContain(
+            document.Descendants(presentation + "TextBlock"),
+            element => (string?)element.Attribute("Text") == "TODAY · TOP CATEGORIES");
+    }
+
+    [Fact]
     public void Overlay_uses_approved_width_and_configurable_bar_font_size()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
