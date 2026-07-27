@@ -59,18 +59,18 @@
     <StackPanel>
       <Grid Margin="1,0,1,13" Opacity="{Binding HeaderOpacity}">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock Text="TODAY · "
+          <TextBlock Text="LAST UPDATE · "
                      Foreground="White"
                      FontFamily="Segoe UI"
                      FontSize="16"
                      FontWeight="SemiBold" />
-          <TextBlock Text="{Binding TotalDurationText}"
+          <TextBlock Text="{Binding LastRefreshText}"
                      Foreground="White"
                      FontFamily="Segoe UI"
                      FontSize="16"
                      FontWeight="Normal" />
         </StackPanel>
-        <TextBlock Text="{Binding LastRefreshText}"
+        <TextBlock Text="{Binding TotalDurationText}"
                    HorizontalAlignment="Right"
                    Foreground="White"
                    FontFamily="Segoe UI"

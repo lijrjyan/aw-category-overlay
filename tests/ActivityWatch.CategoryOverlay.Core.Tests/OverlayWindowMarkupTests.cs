@@ -29,6 +29,35 @@ public sealed class OverlayWindowMarkupTests
     }
 
     [Fact]
+    public void Header_labels_last_update_and_places_total_on_the_right()
+    {
+        var document = XDocument.Load(GetOverlayXamlPath());
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var textBlocks = document
+            .Descendants(presentation + "TextBlock")
+            .ToList();
+        var lastRefresh = textBlocks.Single(element =>
+            (string?)element.Attribute("Text") == "{Binding LastRefreshText}");
+        var totalDuration = textBlocks.Single(element =>
+            (string?)element.Attribute("Text") == "{Binding TotalDurationText}");
+
+        Assert.Contains(
+            textBlocks,
+            element => (string?)element.Attribute("Text") == "LAST UPDATE · ");
+        Assert.DoesNotContain(
+            textBlocks,
+            element => (string?)element.Attribute("Text") == "TODAY · ");
+        Assert.Equal(
+            lastRefresh.Parent,
+            textBlocks.Single(element =>
+                (string?)element.Attribute("Text") == "LAST UPDATE · ").Parent);
+        Assert.Equal(
+            "Right",
+            totalDuration.Attribute("HorizontalAlignment")?.Value);
+    }
+
+    [Fact]
     public void Requirement_label_appears_after_the_divider()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
