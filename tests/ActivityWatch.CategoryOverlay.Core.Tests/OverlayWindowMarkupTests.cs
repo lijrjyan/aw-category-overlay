@@ -71,6 +71,21 @@ public sealed class OverlayWindowMarkupTests
     }
 
     [Fact]
+    public void Progress_value_reads_the_view_model_without_writing_back()
+    {
+        var document = XDocument.Load(GetOverlayXamlPath());
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var progress = document
+            .Descendants(presentation + "ProgressBar")
+            .Single();
+
+        Assert.Equal(
+            "{Binding FillFraction, Mode=OneWay}",
+            progress.Attribute("Value")?.Value);
+    }
+
+    [Fact]
     public void Overlay_uses_approved_width_and_configurable_bar_font_size()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
