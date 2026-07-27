@@ -57,10 +57,10 @@ public sealed class OverlayWindowMarkupTests
         Assert.Contains("TotalDurationText", source);
         Assert.Contains("RequirementText", source);
         Assert.Contains(
-            "TotalDurationText = OverlayText.FormatElapsedDuration(state.TotalActiveTime)",
+            "TotalDurationText = OverlayText.FormatDuration(state.TotalActiveTime)",
             source);
         Assert.Contains(
-            "ActualText = OverlayText.FormatElapsedDuration(row.Actual)",
+            "ActualText = OverlayText.FormatDuration(row.Actual)",
             source);
         Assert.Contains(
             "ThresholdText = OverlayText.FormatDuration(row.Target.Threshold)",

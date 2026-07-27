@@ -19,35 +19,6 @@ public sealed class OverlayTextTests
     }
 
     [Theory]
-    [InlineData(0, "00:00")]
-    [InlineData(3039, "50:39")]
-    [InlineData(3723, "01:02:03")]
-    public void FormatElapsedDuration_keeps_second_precision(
-        int seconds,
-        string expected)
-    {
-        Assert.Equal(
-            expected,
-            OverlayText.FormatElapsedDuration(TimeSpan.FromSeconds(seconds)));
-    }
-
-    [Fact]
-    public void FormatElapsedDuration_clamps_negative_values()
-    {
-        Assert.Equal(
-            "00:00",
-            OverlayText.FormatElapsedDuration(TimeSpan.FromSeconds(-1)));
-    }
-
-    [Fact]
-    public void FormatElapsedDuration_floors_fractional_seconds()
-    {
-        Assert.Equal(
-            "50:39",
-            OverlayText.FormatElapsedDuration(TimeSpan.FromSeconds(3039.99)));
-    }
-
-    [Theory]
     [InlineData(ThresholdDirection.Minimum, "MIN")]
     [InlineData(ThresholdDirection.Maximum, "MAX")]
     public void FormatDirection_uses_compact_requirement_labels(
