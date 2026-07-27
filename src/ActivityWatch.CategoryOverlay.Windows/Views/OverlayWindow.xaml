@@ -11,6 +11,10 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize">
   <Window.Resources>
+    <Style x:Key="CategoryBarText" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
     <Style x:Key="OverlayProgress" TargetType="ProgressBar">
       <Setter Property="Background" Value="#1FFFFFFF" />
       <Setter Property="BorderThickness" Value="0" />
@@ -77,19 +81,17 @@
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0" Margin="9,0,9,0">
                   <TextBlock Text="{Binding DisplayName}"
+                             Style="{StaticResource CategoryBarText}"
                              VerticalAlignment="Center"
                              Foreground="#F2FFFFFF"
-                             FontFamily="Segoe UI"
-                             FontSize="11"
                              FontWeight="SemiBold"
                              TextTrimming="CharacterEllipsis"
                              Margin="0,0,54,0" />
                   <TextBlock Text="{Binding ThresholdText}"
+                             Style="{StaticResource CategoryBarText}"
                              HorizontalAlignment="Right"
                              VerticalAlignment="Center"
                              Foreground="#B8FFFFFF"
-                             FontFamily="Segoe UI"
-                             FontSize="11"
                              FontWeight="SemiBold" />
                 </Grid>
                 <Border Grid.Column="0"
@@ -98,12 +100,11 @@
                         Background="#C8FFFFFF" />
                 <TextBlock Grid.Column="1"
                            Text="{Binding ActualText}"
+                           Style="{StaticResource CategoryBarText}"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"
                            Margin="9,0"
                            Foreground="#F2FFFFFF"
-                           FontFamily="Segoe UI"
-                           FontSize="11"
                            FontWeight="Bold" />
               </Grid>
             </Grid>

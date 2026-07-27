@@ -56,6 +56,17 @@ public sealed class ConfigurationStoreTests : IDisposable
         Assert.Single(Directory.GetFiles(_directory, "config.corrupt-*.json"));
     }
 
+    [Fact]
+    public async Task Load_missing_file_returns_approved_visual_defaults()
+    {
+        var path = Path.Combine(_directory, "missing.json");
+        var store = new ConfigurationStore(path);
+
+        var configuration = await store.LoadAsync(CancellationToken.None);
+
+        Assert.Equal(0.60, configuration.Opacity);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(6)]

@@ -8,7 +8,7 @@ public sealed record OverlayConfiguration
 
     public int RefreshMinutes { get; init; } = 5;
 
-    public double Opacity { get; init; } = 0.72;
+    public double Opacity { get; init; } = 0.60;
 
     public double? Left { get; init; }
 
