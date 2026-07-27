@@ -12,7 +12,7 @@ namespace ActivityWatch.CategoryOverlay.Windows.ViewModels;
 
 public sealed class OverlayViewModel : INotifyPropertyChanged
 {
-    private string _totalDurationText = "0m";
+    private string _totalDurationText = "0s";
     private string _lastRefreshText = "--:--";
     private double _headerOpacity = 0.62;
     private double _overlayOpacity = 0.72;
@@ -70,7 +70,7 @@ public sealed class OverlayViewModel : INotifyPropertyChanged
             Rows.RemoveAt(Rows.Count - 1);
         }
 
-        TotalDurationText = OverlayText.FormatDuration(state.TotalActiveTime);
+        TotalDurationText = OverlayText.FormatElapsedDuration(state.TotalActiveTime);
         LastRefreshText = state.LastSuccessfulRefresh?.ToLocalTime().ToString("HH:mm")
             ?? "--:--";
         HeaderOpacity = state.IsStale ? 0.35 : 0.62;
@@ -162,7 +162,7 @@ public sealed class OverlayRowViewModel : INotifyPropertyChanged
         DisplayName = row.Target.DisplayName;
         ThresholdText = OverlayText.FormatDuration(row.Target.Threshold);
         RequirementText = OverlayText.FormatDirection(row.Target.Direction);
-        ActualText = OverlayText.FormatDuration(row.Actual);
+        ActualText = OverlayText.FormatElapsedDuration(row.Actual);
         FillFraction = row.FillFraction;
         FillBrush = row.Status switch
         {

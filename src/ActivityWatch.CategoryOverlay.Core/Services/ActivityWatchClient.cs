@@ -27,16 +27,39 @@ public sealed class ActivityWatchClient(HttpClient httpClient) : IActivityWatchC
             "/api/0/buckets/",
             cancellationToken);
 
-        var windowBucket = buckets.Values
-            .Where(bucket => bucket.Type == "currentwindow")
-            .OrderBy(bucket => bucket.Id, StringComparer.Ordinal)
-            .FirstOrDefault()
+        var windowBuckets = buckets.Values
+            .Where(bucket => bucket.Type == "currentwindow"
+                && !bucket.Id.StartsWith(
+                    "aw-watcher-android",
+                    StringComparison.Ordinal))
+            .ToList();
+        var preferredHost = GetLandingPageHost(settings.Landingpage)
+            ?? windowBuckets
+                .OrderByDescending(bucket => bucket.LastUpdated)
+                .Select(bucket => bucket.Hostname)
+                .FirstOrDefault();
+        var windowBucket = windowBuckets
+            .FirstOrDefault(bucket => bucket.Hostname == preferredHost)
+            ?? windowBuckets.FirstOrDefault()
             ?? throw new HttpRequestException("No currentwindow bucket is available.");
         var afkBucket = buckets.Values.FirstOrDefault(
             bucket => bucket.Type == "afkstatus"
                 && bucket.Hostname == windowBucket.Hostname)
             ?? throw new HttpRequestException(
                 $"No afkstatus bucket matches host {windowBucket.Hostname}.");
+        var browserBuckets = buckets.Values
+            .Where(bucket => bucket.Type == "web.tab.current"
+                && bucket.Hostname == windowBucket.Hostname)
+            .Select(bucket => bucket.Id)
+            .ToList();
+        if (browserBuckets.Count == 0)
+        {
+            browserBuckets = buckets.Values
+                .Where(bucket => bucket.Type == "web.tab.current"
+                    && bucket.Hostname == "unknown")
+                .Select(bucket => bucket.Id)
+                .ToList();
+        }
 
         var queryClasses = classes
             .Select(category => new object[] { category.Name, category.Rule })
@@ -45,6 +68,8 @@ public sealed class ActivityWatchClient(HttpClient httpClient) : IActivityWatchC
         var query = ActivityWatchQueryBuilder.Build(
             windowBucket.Id,
             afkBucket.Id,
+            browserBuckets,
+            settings.AlwaysActivePattern,
             classesJson);
         var timePeriod = string.Create(
             CultureInfo.InvariantCulture,
@@ -92,6 +117,24 @@ public sealed class ActivityWatchClient(HttpClient httpClient) : IActivityWatchC
         return new ActivityWatchSnapshot(startOfDay, available, durations);
     }
 
+    private static string? GetLandingPageHost(string? landingpage)
+    {
+        const string prefix = "/activity/";
+        if (string.IsNullOrWhiteSpace(landingpage)
+            || !landingpage.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var hostEnd = landingpage.IndexOf('/', prefix.Length);
+        var escapedHost = hostEnd < 0
+            ? landingpage[prefix.Length..]
+            : landingpage[prefix.Length..hostEnd];
+        return escapedHost.Length == 0
+            ? null
+            : Uri.UnescapeDataString(escapedHost);
+    }
+
     private async Task<T> GetRequiredAsync<T>(
         string path,
         CancellationToken cancellationToken)
@@ -103,7 +146,11 @@ public sealed class ActivityWatchClient(HttpClient httpClient) : IActivityWatchC
             ?? throw new HttpRequestException($"ActivityWatch returned no JSON for {path}.");
     }
 
-    private sealed record SettingsDto(string StartOfDay);
+    private sealed record SettingsDto(
+        string StartOfDay,
+        string? Landingpage,
+        [property: JsonPropertyName("always_active_pattern")]
+        string? AlwaysActivePattern);
 
     private sealed record CategoryRuleDto(
         IReadOnlyList<string> Name,
@@ -112,7 +159,8 @@ public sealed class ActivityWatchClient(HttpClient httpClient) : IActivityWatchC
     private sealed record BucketDto(
         string Id,
         string Type,
-        string Hostname);
+        string Hostname,
+        DateTimeOffset? LastUpdated);
 
     private sealed record QueryRequest(
         IReadOnlyList<string> Timeperiods,

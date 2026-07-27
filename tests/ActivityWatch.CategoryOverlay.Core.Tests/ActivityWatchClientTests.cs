@@ -89,6 +89,56 @@ public sealed class ActivityWatchClientTests
             timePeriods);
     }
 
+    [Fact]
+    public async Task GetSnapshot_matches_web_ui_activity_query_defaults()
+    {
+        var handler = new RecordingActivityWatchHandler();
+        var client = CreateClient(handler);
+
+        await client.GetSnapshotAsync(
+            DateTimeOffset.Parse("2026-07-27T04:00:00-07:00"),
+            DateTimeOffset.Parse("2026-07-28T04:00:00-07:00"),
+            CancellationToken.None);
+
+        var queryRequest = Assert.Single(
+            handler.Requests,
+            request => request.RequestUri.AbsolutePath == "/api/0/query/");
+        using var payload = JsonDocument.Parse(queryRequest.Body);
+        var query = payload.RootElement
+            .GetProperty("query")
+            .EnumerateArray()
+            .Select(statement => statement.GetString()!)
+            .ToArray();
+        var queryText = string.Join('\n', query);
+
+        Assert.Contains(
+            """not_treat_as_afk = filter_keyvals_regex(events, "app", "Music|Render");""",
+            query);
+        Assert.Contains(
+            """not_treat_as_afk = filter_keyvals_regex(events, "title", "Music|Render");""",
+            query);
+        Assert.Contains(
+            """events_chrome = flood(query_bucket("aw-watcher-web-chrome_MSI"));""",
+            query);
+        Assert.Contains(
+            """events_chrome = split_url_events(events_chrome);""",
+            query);
+        Assert.Contains(
+            """audible_events = filter_keyvals(browser_events, "audible", [true]);""",
+            query);
+        Assert.DoesNotContain("aw-watcher-web-chrome_unknown", queryText);
+        Assert.DoesNotContain("aw-watcher-web-firefox_unknown", queryText);
+
+        var audibleUnion = Array.IndexOf(
+            query,
+            "not_afk = period_union(not_afk, audible_events);");
+        var activeIntersection = Array.IndexOf(
+            query,
+            "events = filter_period_intersect(events, not_afk);");
+        Assert.True(audibleUnion >= 0);
+        Assert.True(activeIntersection > audibleUnion);
+    }
+
     private static ActivityWatchClient CreateClient(HttpMessageHandler handler)
     {
         return new ActivityWatchClient(
@@ -115,7 +165,13 @@ public sealed class ActivityWatchClientTests
 
             var json = request.RequestUri!.AbsolutePath switch
             {
-                "/api/0/settings" => """{"startOfDay":"04:00"}""",
+                "/api/0/settings" => """
+                    {
+                      "startOfDay":"04:00",
+                      "landingpage":"/activity/MSI/view/",
+                      "always_active_pattern":"Music|Render"
+                    }
+                    """,
                 "/api/0/settings/classes" => """
                     [
                       {
@@ -134,7 +190,26 @@ public sealed class ActivityWatchClientTests
                       "aw-watcher-afk_MSI":{
                         "id":"aw-watcher-afk_MSI",
                         "type":"afkstatus",
-                        "hostname":"MSI"
+                        "hostname":"MSI",
+                        "last_updated":"2026-07-27T20:00:00Z"
+                      },
+                      "aw-watcher-web-chrome_MSI":{
+                        "id":"aw-watcher-web-chrome_MSI",
+                        "type":"web.tab.current",
+                        "hostname":"MSI",
+                        "last_updated":"2026-07-27T20:00:00Z"
+                      },
+                      "aw-watcher-web-chrome_unknown":{
+                        "id":"aw-watcher-web-chrome_unknown",
+                        "type":"web.tab.current",
+                        "hostname":"unknown",
+                        "last_updated":"2026-07-27T20:00:00Z"
+                      },
+                      "aw-watcher-web-firefox_unknown":{
+                        "id":"aw-watcher-web-firefox_unknown",
+                        "type":"web.tab.current",
+                        "hostname":"unknown",
+                        "last_updated":"2026-07-27T20:00:00Z"
                       }
                     }
                     """,

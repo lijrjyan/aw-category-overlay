@@ -15,6 +15,28 @@ public static class OverlayText
         return $"{totalMinutes / 60}h {totalMinutes % 60:00}m";
     }
 
+    public static string FormatElapsedDuration(TimeSpan duration)
+    {
+        var totalSeconds = Math.Max(0, (long)Math.Floor(duration.TotalSeconds));
+        var hours = totalSeconds / 3600;
+        var minutes = totalSeconds / 60 % 60;
+        var seconds = totalSeconds % 60;
+        var parts = new List<string>(3);
+
+        if (hours > 0)
+        {
+            parts.Add($"{hours}h");
+            parts.Add($"{minutes}m");
+        }
+        else if (minutes > 0)
+        {
+            parts.Add($"{minutes}m");
+        }
+
+        parts.Add($"{seconds}s");
+        return string.Join(' ', parts);
+    }
+
     public static string FormatDirection(ThresholdDirection direction)
     {
         return direction switch
