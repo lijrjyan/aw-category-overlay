@@ -9,4 +9,3 @@ public interface IActivityWatchClient
         DateTimeOffset end,
         CancellationToken cancellationToken);
 }
-

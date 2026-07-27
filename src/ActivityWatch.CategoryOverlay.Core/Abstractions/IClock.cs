@@ -13,4 +13,3 @@ public sealed class SystemClock : IClock
 
     public TimeZoneInfo LocalTimeZone => TimeZoneInfo.Local;
 }
-

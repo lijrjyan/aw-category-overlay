@@ -34,4 +34,3 @@ public static class ClickThroughWindow
         int index,
         IntPtr newValue);
 }
-

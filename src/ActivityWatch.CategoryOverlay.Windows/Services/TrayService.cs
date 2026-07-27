@@ -77,4 +77,3 @@ public sealed class TrayService : IDisposable
         _notifyIcon.Dispose();
     }
 }
-

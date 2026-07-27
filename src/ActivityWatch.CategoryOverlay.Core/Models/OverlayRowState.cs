@@ -14,4 +14,3 @@ public sealed record OverlayRowState(
     ThresholdStatus Status,
     double FillFraction,
     double DividerFraction = 0.65);
-

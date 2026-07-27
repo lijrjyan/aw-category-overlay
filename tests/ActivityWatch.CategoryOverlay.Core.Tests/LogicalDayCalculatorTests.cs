@@ -22,4 +22,3 @@ public sealed class LogicalDayCalculatorTests
         Assert.Equal(window.Start.AddDays(1), window.End);
     }
 }
-

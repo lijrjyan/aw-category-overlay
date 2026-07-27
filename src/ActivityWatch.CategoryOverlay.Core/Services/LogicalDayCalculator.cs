@@ -22,4 +22,3 @@ public static class LogicalDayCalculator
         return new LogicalDayWindow(start, end);
     }
 }
-

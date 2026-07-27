@@ -14,4 +14,3 @@ public sealed record CategoryTarget(
 {
     public string DisplayName => string.Join(" › ", Path);
 }
-

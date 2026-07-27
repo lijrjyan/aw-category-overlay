@@ -51,4 +51,3 @@ public partial class OverlayWindow : Window
         Top = Math.Clamp(desiredTop, workArea.Top, workArea.Bottom - ActualHeight);
     }
 }
-

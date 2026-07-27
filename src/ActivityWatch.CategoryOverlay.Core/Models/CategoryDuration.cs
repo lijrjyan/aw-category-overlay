@@ -8,4 +8,3 @@ public sealed record ActivityWatchSnapshot(
     TimeOnly StartOfDay,
     IReadOnlyList<IReadOnlyList<string>> AvailableCategories,
     IReadOnlyList<CategoryDuration> Durations);
-
