@@ -1,0 +1,60 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore ActivityWatch.CategoryOverlay.sln
+
+      - name: Test core
+        run: >
+          dotnet test ActivityWatch.CategoryOverlay.sln
+          --configuration Release
+          --no-restore
+
+      - name: Test module installer
+        shell: powershell
+        run: >
+          Invoke-Pester
+          -Script .\tests\ModuleInstaller.Tests.ps1
+          -Verbose
+          -EnableExit
+
+      - name: Build
+        run: >
+          dotnet build ActivityWatch.CategoryOverlay.sln
+          --configuration Release
+          --no-restore
+
+      - name: Check formatting
+        run: >
+          dotnet format ActivityWatch.CategoryOverlay.sln
+          --verify-no-changes
+          --no-restore
+
+      - name: Publish Windows executable
+        run: >
+          dotnet publish
+          src/ActivityWatch.CategoryOverlay.Windows/ActivityWatch.CategoryOverlay.Windows.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained false
+          -p:PublishSingleFile=true
+          --output artifacts/win-x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aw-category-overlay-win-x64
+          path: artifacts/win-x64/ActivityWatch.CategoryOverlay.exe
