@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>ActivityWatch.CategoryOverlay</AssemblyName>
+    <RootNamespace>ActivityWatch.CategoryOverlay.Windows</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ActivityWatch.CategoryOverlay.Core\ActivityWatch.CategoryOverlay.Core.csproj" />
+  </ItemGroup>
+</Project>
+
