@@ -80,6 +80,11 @@ public sealed class OverlayStateService(
             _state = _state with { IsStale = true };
             return _state;
         }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            _state = _state with { IsStale = true };
+            return _state;
+        }
     }
 
     private sealed class CategoryPathComparer :

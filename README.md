@@ -46,6 +46,12 @@ Launch:
 aw-category-overlay/artifacts/win-x64/ActivityWatch.CategoryOverlay.exe
 ```
 
+For a stable Windows-local path, copy the executable to:
+
+```text
+%LOCALAPPDATA%\ActivityWatch\CategoryOverlay\ActivityWatch.CategoryOverlay.exe
+```
+
 ## Use
 
 The application starts as a top-right semi-transparent overlay and adds a system
@@ -61,6 +67,10 @@ tray icon. The tray menu provides:
 Normal mode is mouse-click-through. In Settings, select categories, arrange their
 fixed display order, choose `Minimum` or `Maximum`, set one threshold, choose a
 five- or ten-minute refresh interval, and adjust opacity.
+
+On the first run, Settings opens automatically because no categories have been
+selected yet. Subsequent launches keep the saved selection and remain
+unobtrusive.
 
 Configuration is stored at:
 

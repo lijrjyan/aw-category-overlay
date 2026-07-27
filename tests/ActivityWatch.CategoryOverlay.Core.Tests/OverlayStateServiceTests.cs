@@ -52,6 +52,20 @@ public sealed class OverlayStateServiceTests
     }
 
     [Fact]
+    public async Task Timed_out_refresh_returns_stale_state_instead_of_exiting()
+    {
+        var client = FakeActivityWatchClient.Throwing(
+            new TaskCanceledException("request timed out"));
+        var service = CreateService(client, [Target(["Work", "Research"], 0)]);
+
+        var state = await service.RefreshAsync(CancellationToken.None);
+
+        Assert.True(state.IsStale);
+        Assert.Empty(state.Rows);
+        Assert.Null(state.LastSuccessfulRefresh);
+    }
+
+    [Fact]
     public async Task Refresh_omits_target_whose_category_no_longer_exists()
     {
         var targets = new[]
@@ -154,6 +168,11 @@ public sealed class OverlayStateServiceTests
             Exception exception)
         {
             return new FakeActivityWatchClient([snapshot, exception]);
+        }
+
+        public static FakeActivityWatchClient Throwing(Exception exception)
+        {
+            return new FakeActivityWatchClient([exception]);
         }
 
         public Task<ActivityWatchSnapshot> GetSnapshotAsync(

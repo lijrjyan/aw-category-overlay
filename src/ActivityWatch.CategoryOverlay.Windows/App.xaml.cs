@@ -14,6 +14,8 @@ public partial class App : System.Windows.Application
     private readonly CancellationTokenSource _shutdown = new();
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
     private readonly AutostartService _autostartService = new();
+    private Mutex? _singleInstanceMutex;
+    private bool _ownsSingleInstanceMutex;
     private HttpClient? _httpClient;
     private ConfigurationStore? _configurationStore;
     private OverlayConfiguration _configuration = OverlayConfiguration.Default;
@@ -30,6 +32,16 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(System.Windows.StartupEventArgs eventArgs)
     {
         base.OnStartup(eventArgs);
+
+        _singleInstanceMutex = new Mutex(
+            initiallyOwned: true,
+            "Local\\ActivityWatch.CategoryOverlay",
+            out _ownsSingleInstanceMutex);
+        if (!_ownsSingleInstanceMutex)
+        {
+            Shutdown();
+            return;
+        }
 
         var configurationPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -85,6 +97,11 @@ public partial class App : System.Windows.Application
         _trayService?.Dispose();
         _httpClient?.Dispose();
         _refreshGate.Dispose();
+        if (_ownsSingleInstanceMutex)
+        {
+            _singleInstanceMutex?.ReleaseMutex();
+        }
+        _singleInstanceMutex?.Dispose();
         _shutdown.Dispose();
         base.OnExit(eventArgs);
     }
