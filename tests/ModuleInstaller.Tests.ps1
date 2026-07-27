@@ -23,7 +23,7 @@ Describe "ActivityWatch category overlay module installer" {
 "@ | Set-Content $awQtConfigPath
 
         $overlayConfigPath = Join-Path $configDirectory "config.json"
-        @{
+        $overlayJson = @{
             schemaVersion = 1
             startWithWindows = $true
             refreshMinutes = 5
@@ -32,7 +32,11 @@ Describe "ActivityWatch category overlay module installer" {
                     displayName = "Work $([char]0x203A) Job Hunting"
                 }
             )
-        } | ConvertTo-Json | Set-Content $overlayConfigPath
+        } | ConvertTo-Json
+        [IO.File]::WriteAllText(
+            $overlayConfigPath,
+            $overlayJson,
+            [Text.UTF8Encoding]::new($false))
     }
 
     It "installs the executable and enables only the production aw-qt module list" {
