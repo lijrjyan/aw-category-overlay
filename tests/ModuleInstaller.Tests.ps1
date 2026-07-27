@@ -27,6 +27,11 @@ Describe "ActivityWatch category overlay module installer" {
             schemaVersion = 1
             startWithWindows = $true
             refreshMinutes = 5
+            targets = @(
+                @{
+                    displayName = "Work $([char]0x203A) Job Hunting"
+                }
+            )
         } | ConvertTo-Json | Set-Content $overlayConfigPath
     }
 
@@ -69,6 +74,9 @@ Describe "ActivityWatch category overlay module installer" {
         ([regex]::Matches(
             $productionSection.Groups["body"].Value,
             '"aw-category-overlay"')).Count | Should Be 1
+        ([IO.File]::ReadAllText($overlayConfigPath) |
+            ConvertFrom-Json).targets[0].displayName |
+            Should Be "Work $([char]0x203A) Job Hunting"
     }
 
     It "uninstalls only the overlay module and executable" {

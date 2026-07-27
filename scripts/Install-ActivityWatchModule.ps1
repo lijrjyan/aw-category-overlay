@@ -111,7 +111,7 @@ if ($PSCmdlet.ShouldProcess(
 
     if (Test-Path $OverlayConfigPath -PathType Leaf) {
         Copy-Item $OverlayConfigPath "$OverlayConfigPath.backup-$backupStamp"
-        $overlayConfig = Get-Content $OverlayConfigPath -Raw |
+        $overlayConfig = [IO.File]::ReadAllText($OverlayConfigPath) |
             ConvertFrom-Json
         if ($null -eq $overlayConfig.startWithWindows) {
             $overlayConfig |
