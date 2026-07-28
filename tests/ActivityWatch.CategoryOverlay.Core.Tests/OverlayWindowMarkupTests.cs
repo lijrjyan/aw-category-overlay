@@ -124,6 +124,22 @@ public sealed class OverlayWindowMarkupTests
     }
 
     [Fact]
+    public void Threshold_divider_matches_the_evaluator_fraction()
+    {
+        var document = XDocument.Load(GetOverlayXamlPath());
+        XNamespace presentation =
+            "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        var columns = document
+            .Descendants(presentation + "Grid.ColumnDefinitions")
+            .Single()
+            .Elements(presentation + "ColumnDefinition")
+            .Select(element => element.Attribute("Width")?.Value)
+            .ToArray();
+
+        Assert.Equal(["65*", "35*"], columns);
+    }
+
+    [Fact]
     public void Overlay_uses_approved_width_and_configurable_bar_font_size()
     {
         var document = XDocument.Load(GetOverlayXamlPath());
